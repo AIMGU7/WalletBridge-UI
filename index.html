@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WalletBridge - Uniswap Style</title>
+  <!-- Include ethers.js v5 from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    /* Dark background */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #131313;
+      font-family: sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header bar */
+    header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: #131313;
+
+    }
+
+    /* Connect button top-right */
+    .connect-btn {
+      background-color: #FF007A; /* Pink accent */
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .connect-btn:hover {
+      background-color: #D60065;
+    }
+
+    /* Main container for content */
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    /* Card style in center */
+    .card {
+      background-color: #1F1F1F;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+
+    /* Section title */
+    .section-title {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    /* Labels and inputs */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 0.3rem;
+      color: #ccc;
+    }
+    input {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background-color: #2C2F36;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    /* Buttons inside the card */
+    .card button {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #fff;
+      background-color: #FF007A;
+    }
+    .card button:hover {
+      background-color: #D60065;
+    }
+
+    /* Result / account display */
+    .info {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #bbb;
+      margin-top: 1rem;
+      word-wrap: break-word;
+    }
+
+    /* Sub-section containers (for minimal spacing) */
+    .sub-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #2C2C2C;
+    }
+    .sub-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header with Connect button -->
+  <header>
+    <button id="connectWallet" class="connect-btn">Connect</button>
+  </header>
+
+  <!-- Main content area -->
+  <main>
+    <div class="card">
+      <!-- Mass Transfer Section -->
+      <div class="sub-section">
+        <h2 class="section-title">Mass Transfer</h2>
+        <label for="wbTokenList">Token Addresses (comma-separated)</label>
+        <input type="text" id="wbTokenList" placeholder="0xToken1, 0xToken2" />
+
+        <label for="wbReceiver">Receiver Address</label>
+        <input type="text" id="wbReceiver" placeholder="0xReceiver" />
+
+        <label for="wbFee">Fee (ETH)</label>
+        <input type="text" id="wbFee" placeholder="0.0" />
+
+        <button id="massTransferBtn">Send Mass Transfer</button>
+      </div>
+
+      <!-- Owner Functions Section -->
+      <div class="sub-section">
+        <h2 class="section-title">Owner Functions</h2>
+        <label for="wbNewFee">Change Fee (ETH)</label>
+        <input type="text" id="wbNewFee" placeholder="0.0" />
+
+        <button id="changeFeeBtn">Change Fee</button>
+
+        <label for="wbWithdrawAddress">Withdraw ETH to Address</label>
+        <input type="text" id="wbWithdrawAddress" placeholder="0xAddress" />
+
+        <button id="withdrawEthBtn">Withdraw ETH</button>
+      </div>
+
+      <!-- Display connected account -->
+      <div class="info" id="account"></div>
+    </div>
+  </main>
+
+  <script>
+    // Replace with your actual deployed WalletBridge contract address
+    const walletBridgeAddress = "0x56034c2a2600826AE9F5b423457B242e8051f35D";
+    
+    // Minimal ABI for WalletBridge interactions
+    const walletBridgeABI = [
+      { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+      {
+        "inputs": [
+          { "internalType": "address[]", "name": "tokenList", "type": "address[]" },
+          { "internalType": "address", "name": "receiver", "type": "address" }
+        ],
+        "name": "massTransfer",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "uint256", "name": "newFee", "type": "uint256" }
+        ],
+        "name": "changeFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "address", "name": "to", "type": "address" }
+        ],
+        "name": "withdrawEth",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+
+    let provider, signer, walletBridgeContract;
+
+    // Connect to wallet (Rabby, MetaMask, etc.)
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          const account = await signer.getAddress();
+          document.getElementById("account").innerText = "Connected: " + account;
+
+          // Create a contract instance
+          walletBridgeContract = new ethers.Contract(walletBridgeAddress, walletBridgeABI, signer);
+        } catch (err) {
+          console.error("Error connecting wallet:", err);
+        }
+      } else {
+        alert("Please install Rabby or MetaMask!");
+      }
+    }
+    document.getElementById("connectWallet").addEventListener("click", connectWallet);
+
+    // Mass Transfer function
+    async function massTransfer() {
+      if (!walletBridgeContract) return;
+      const tokenListStr = document.getElementById("wbTokenList").value;
+      const receiver = document.getElementById("wbReceiver").value;
+      const feeInEth = document.getElementById("wbFee").value;
+
+      const tokenList = tokenListStr.split(",").map(t => t.trim());
+      const fee = ethers.utils.parseEther(feeInEth || "0");
+
+      try {
+        const tx = await walletBridgeContract.massTransfer(tokenList, receiver, { value: fee });
+        console.log("Mass transfer tx:", tx.hash);
+        await tx.wait();
+        console.log("Mass transfer complete");
+      } catch (err) {
+        console.error("Mass transfer error:", err);
+      }
+    }
+    document.getElementById("massTransferBtn").addEventListener("click", massTransfer);
+
+    // Change Fee function
+    async function changeFee() {
+      if (!walletBridgeContract) return;
+      const newFeeEth = document.getElementById("wbNewFee").value;
+      const newFee = ethers.utils.parseEther(newFeeEth || "0");
+
+      try {
+        const tx = await walletBridgeContract.changeFee(newFee);
+        console.log("Change fee tx:", tx.hash);
+        await tx.wait();
+        console.log("Fee updated");
+      } catch (err) {
+        console.error("Change fee error:", err);
+      }
+    }
+    document.getElementById("changeFeeBtn").addEventListener("click", changeFee);
+
+    // Withdraw ETH function
+    async function withdrawEth() {
+      if (!walletBridgeContract) return;
+      const toAddress = document.getElementById("wbWithdrawAddress").value;
+      try {
+        const tx = await walletBridgeContract.withdrawEth(toAddress);
+        console.log("Withdraw tx:", tx.hash);
+        await tx.wait();
+        console.log("Withdrawal complete");
+      } catch (err) {
+        console.error("Withdraw error:", err);
+      }
+    }
+    document.getElementById("withdrawEthBtn").addEventListener("click", withdrawEth);
+  </script>
+</body>
+</html>

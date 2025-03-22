@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WalletBridge DApp</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f5f6fa;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    /* Top Navigation Bar */
+    .navbar {
+      width: 100%;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .navbar button {
+      background: none;
+      border: none;
+      padding: 15px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .navbar button.active {
+      border-bottom: 3px solid #4a90e2;
+      color: #4a90e2;
+      font-weight: bold;
+    }
+    /* Main container */
+    .container {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin: 20px;
+      width: 90%;
+      max-width: 480px;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      background: #4a90e2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #4071c4;
+    }
+    .result {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 12px;
+    }
+  </style>
+  <!-- Include ethers.js v5 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <button id="tabWalletBridge" class="active">WalletBridge</button>
+    <button id="tabToken">Token</button>
+  </nav>
+
+  <div class="container">
+    <!-- Connect Wallet Section -->
+    <button id="connectWallet">Connect Wallet</button>
+    <p id="account" class="result"></p>
+
+    <!-- WalletBridge Section -->
+    <div id="walletBridgeSection">
+      <h2>WalletBridge</h2>
+      <!-- Mass Transfer -->
+      <label for="wbTokenList">Token Addresses (comma-separated)</label>
+      <input type="text" id="wbTokenList" placeholder="0x...,0x..." />
+      <label for="wbReceiver">Receiver Address</label>
+      <input type="text" id="wbReceiver" placeholder="0x..." />
+      <label for="wbFee">Fee (ETH)</label>
+      <input type="text" id="wbFee" placeholder="0.0" />
+      <button id="massTransferBtn">Mass Transfer</button>
+      <!-- Change Fee -->
+      <label for="wbNewFee">Change Fee (ETH)</label>
+      <input type="text" id="wbNewFee" placeholder="0.0" />
+      <button id="changeFeeBtn">Change Fee</button>
+      <!-- Withdraw ETH -->
+      <label for="wbWithdrawAddress">Withdraw ETH to Address</label>
+      <input type="text" id="wbWithdrawAddress" placeholder="0x..." />
+      <button id="withdrawEthBtn">Withdraw ETH</button>
+    </div>
+
+    <!-- Token Section -->
+    <div id="tokenSection" style="display: none;">
+      <h2>Token</h2>
+      <label for="tokenSelect">Select Token</label>
+      <select id="tokenSelect">
+        <option value="token1">Token1</option>
+        <option value="token2">Token2</option>
+      </select>
+      <!-- Approve Token -->
+      <label for="tokenApproveAmount">Approve Amount (ETH units)</label>
+      <input type="text" id="tokenApproveAmount" placeholder="e.g. 20" />
+      <button id="approveTokenBtn">Approve</button>
+      <!-- Check Allowance -->
+      <label for="tokenAllowanceOwner">Owner Address</label>
+      <input type="text" id="tokenAllowanceOwner" placeholder="0x..." />
+      <label for="tokenAllowanceSpender">Spender Address</label>
+      <input type="text" id="tokenAllowanceSpender" placeholder="0x..." />
+      <button id="checkAllowanceBtn">Check Allowance</button>
+      <p id="allowanceResult" class="result"></p>
+      <!-- Check Balance -->
+      <button id="checkBalanceBtn">Check Balance</button>
+      <p id="balanceResult" class="result"></p>
+    </div>
+  </div>
+
+  <script>
+    // Contract addresses (update these with your deployed addresses)
+    const walletBridgeAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+    const token1Address = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const token2Address = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+
+    // Minimal ABIs
+    const walletBridgeABI = [
+      { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+      {
+        "inputs": [
+          { "internalType": "address[]", "name": "tokenList", "type": "address[]" },
+          { "internalType": "address", "name": "receiver", "type": "address" }
+        ],
+        "name": "massTransfer",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "uint256", "name": "newFee", "type": "uint256" }
+        ],
+        "name": "changeFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "address", "name": "to", "type": "address" }
+        ],
+        "name": "withdrawEth",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+    const erc20ABI = [
+      "function approve(address spender, uint256 amount) public returns (bool)",
+      "function allowance(address owner, address spender) external view returns (uint256)",
+      "function balanceOf(address account) external view returns (uint256)"
+    ];
+
+    let provider, signer, walletBridgeContract;
+    
+    // Connect Wallet
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          const account = await signer.getAddress();
+          document.getElementById("account").innerText = "Connected: " + account;
+          // Initialize WalletBridge contract instance
+          walletBridgeContract = new ethers.Contract(walletBridgeAddress, walletBridgeABI, signer);
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        alert("Please install MetaMask");
+      }
+    }
+    document.getElementById("connectWallet").addEventListener("click", connectWallet);
+
+    // Tab switching
+    document.getElementById("tabWalletBridge").addEventListener("click", () => {
+      document.getElementById("walletBridgeSection").style.display = "block";
+      document.getElementById("tokenSection").style.display = "none";
+      document.getElementById("tabWalletBridge").classList.add("active");
+      document.getElementById("tabToken").classList.remove("active");
+    });
+    document.getElementById("tabToken").addEventListener("click", () => {
+      document.getElementById("walletBridgeSection").style.display = "none";
+      document.getElementById("tokenSection").style.display = "block";
+      document.getElementById("tabToken").classList.add("active");
+      document.getElementById("tabWalletBridge").classList.remove("active");
+    });
+
+    // WalletBridge functions
+    async function massTransfer() {
+      const tokenListStr = document.getElementById("wbTokenList").value;
+      const receiver = document.getElementById("wbReceiver").value;
+      const feeInEth = document.getElementById("wbFee").value;
+      const tokenList = tokenListStr.split(",").map(t => t.trim());
+      const fee = ethers.utils.parseEther(feeInEth || "0");
+      try {
+        const tx = await walletBridgeContract.massTransfer(tokenList, receiver, { value: fee });
+        console.log("Mass transfer tx:", tx.hash);
+        await tx.wait();
+        console.log("Mass transfer complete");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    document.getElementById("massTransferBtn").addEventListener("click", massTransfer);
+
+    async function changeFee() {
+      const newFeeEth = document.getElementById("wbNewFee").value;
+      const newFee = ethers.utils.parseEther(newFeeEth || "0");
+      try {
+        const tx = await walletBridgeContract.changeFee(newFee);
+        console.log("Change fee tx:", tx.hash);
+        await tx.wait();
+        console.log("Fee updated");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    document.getElementById("changeFeeBtn").addEventListener("click", changeFee);
+
+    async function withdrawEth() {
+      const toAddress = document.getElementById("wbWithdrawAddress").value;
+      try {
+        const tx = await walletBridgeContract.withdrawEth(toAddress);
+        console.log("Withdraw tx:", tx.hash);
+        await tx.wait();
+        console.log("Withdrawal complete");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    document.getElementById("withdrawEthBtn").addEventListener("click", withdrawEth);
+
+    // Token functions (for both Token1 and Token2)
+    function getSelectedTokenAddress() {
+      const selection = document.getElementById("tokenSelect").value;
+      return selection === "token1" ? token1Address : token2Address;
+    }
+
+    async function approveToken() {
+      const tokenAddress = getSelectedTokenAddress();
+      const amountStr = document.getElementById("tokenApproveAmount").value;
+      const amount = ethers.utils.parseEther(amountStr || "0");
+      const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, signer);
+      try {
+        const tx = await tokenContract.approve(walletBridgeAddress, amount);
+        console.log("Token approval tx:", tx.hash);
+        await tx.wait();
+        console.log("Approval successful");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    document.getElementById("approveTokenBtn").addEventListener("click", approveToken);
+
+    async function checkAllowance() {
+      const tokenAddress = getSelectedTokenAddress();
+      const owner = document.getElementById("tokenAllowanceOwner").value;
+      const spender = document.getElementById("tokenAllowanceSpender").value;
+      const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, provider);
+      try {
+        const allowance = await tokenContract.allowance(owner, spender);
+        document.getElementById("allowanceResult").innerText = "Allowance: " + ethers.utils.formatEther(allowance);
+      } catch (err) {
+        console.error(err);
+        document.getElementById("allowanceResult").innerText = "Error: " + err.message;
+      }
+    }
+    document.getElementById("checkAllowanceBtn").addEventListener("click", checkAllowance);
+
+    async function checkBalance() {
+      const tokenAddress = getSelectedTokenAddress();
+      const account = await signer.getAddress();
+      const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, provider);
+      try {
+        const balance = await tokenContract.balanceOf(account);
+        document.getElementById("balanceResult").innerText = "Balance: " + ethers.utils.formatEther(balance);
+      } catch (err) {
+        console.error(err);
+        document.getElementById("balanceResult").innerText = "Error: " + err.message;
+      }
+    }
+    document.getElementById("checkBalanceBtn").addEventListener("click", checkBalance);
+  </script>
+</body>
+</html>
