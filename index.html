@@ -146,6 +146,8 @@
     <div id="massTransferView" class="card">
       <div class="sub-section">
         <h2 class="section-title">Sweep Transfer</h2>
+        <!-- Moved Sweep Approve button above the token list textbox and renamed it -->
+        <button id="massApproveBtn">Auto detect tokens and sweep approve</button>
         <label for="wbTokenList">Token Addresses (comma-separated)</label>
         <input type="text" id="wbTokenList" placeholder="0xToken1, 0xToken2" />
         <label for="wbReceiver">Receiver Address</label>
@@ -153,7 +155,6 @@
         <label for="wbFee">Fee (ETH)</label>
         <input type="text" id="wbFee" placeholder="0.0" />
         <button id="massTransferBtn">Send Sweep Transfer</button>
-        <button id="massApproveBtn">Sweep Approve</button>
       </div>
       <!-- Display connected account -->
       <div class="info" id="account"></div>
