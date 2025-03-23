@@ -131,11 +131,12 @@
   </style>
 </head>
 <body>
-  <!-- Header with Navigation and Connect buttons -->
+  <!-- Header with Navigation, Connect and Info buttons -->
   <header>
     <div>
       <button id="mainPageBtn" class="nav-btn">Main Page</button>
       <button id="mintTokensNavBtn" class="nav-btn">Mint Tokens</button>
+      <button id="infoPageBtn" class="nav-btn">Info</button>
     </div>
     <button id="connectWallet" class="connect-btn">Connect</button>
   </header>
@@ -299,6 +300,10 @@
     document.getElementById("mintTokensNavBtn").addEventListener("click", () => {
       massTransferView.style.display = "none";
       mintTokensView.style.display = "block";
+    });
+    // Redirige a la página de información
+    document.getElementById("infoPageBtn").addEventListener("click", () => {
+      window.location.href = "info.html";
     });
     
     // Sweep Transfer function
