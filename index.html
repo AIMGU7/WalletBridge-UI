@@ -326,7 +326,7 @@
         alert("Please enter a valid amount.");
         return;
       }
-      const amount = ethers.utils.parseEther(amountStr);
+      const amount = ethers.utils.amountStr;
       try {
         const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
         const tx = await tokenContract.mint(amount);
