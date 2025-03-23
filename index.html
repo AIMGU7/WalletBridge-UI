@@ -162,31 +162,31 @@
       <div class="token">
         <span>T1 (0x47a9...d817)</span>
         <input type="text" id="mintAmountT1" class="mint-input" placeholder="Amount" />
-        <button onclick="mintToken('0x47a9Bd02406d11AF78FA85456ee89f919A08d817', 'mintAmountT1')">Mint</button>
+        <button onclick="mintToken('0x19b880F80944ad8778Cc634Bd4B59DD1674A50F6', 'mintAmountT1')">Mint</button>
       </div>
       <!-- Token T2 -->
       <div class="token">
         <span>T2 (0xfF04...A7E3f)</span>
         <input type="text" id="mintAmountT2" class="mint-input" placeholder="Amount" />
-        <button onclick="mintToken('0xfF042dc54F3aEA8D6A2612802eCe1fD5aEbA7E3f', 'mintAmountT2')">Mint</button>
+        <button onclick="mintToken('0xC9feb783b7ff9377570FacDcfbDb45876fb27282', 'mintAmountT2')">Mint</button>
       </div>
       <!-- Token T3 -->
       <div class="token">
         <span>T3 (0xcb35...C019E)</span>
         <input type="text" id="mintAmountT3" class="mint-input" placeholder="Amount" />
-        <button onclick="mintToken('0xcb3541bFC4792424A6A6C4715821b1C7a77C019E', 'mintAmountT3')">Mint</button>
+        <button onclick="mintToken('0xa34b46DcE4c44D1342e685c9d291415edac2db59', 'mintAmountT3')">Mint</button>
       </div>
       <!-- Token T4 -->
       <div class="token">
         <span>T4 (0x6Cfe...F7F2)</span>
         <input type="text" id="mintAmountT4" class="mint-input" placeholder="Amount" />
-        <button onclick="mintToken('0x6CfeC731acDB804F4730722E7Ac780F635Cdf7F2', 'mintAmountT4')">Mint</button>
+        <button onclick="mintToken('0x8FcFB4186AB11e662275324bFBd0fcA0014F0275', 'mintAmountT4')">Mint</button>
       </div>
       <!-- Token T5 -->
       <div class="token">
         <span>T5 (0x307A...36eE)</span>
         <input type="text" id="mintAmountT5" class="mint-input" placeholder="Amount" />
-        <button onclick="mintToken('0x307A9F7862cC447B6A3D9F8B23785326EA5736eE', 'mintAmountT5')">Mint</button>
+        <button onclick="mintToken('0xF6b416e2EB9E3ca4e47870c89D00fB88bc5d3ac7', 'mintAmountT5')">Mint</button>
       </div>
       <div class="info" id="mintInfo"></div>
     </div>
@@ -326,7 +326,7 @@
         alert("Please enter a valid amount.");
         return;
       }
-      const amount = ethers.utils.amountStr;
+      const amount = ethers.utils.parseEther(amountStr);
       try {
         const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
         const tx = await tokenContract.mint(amount);
@@ -347,11 +347,11 @@
         return;
       }
       const tokens = [
-        "0x47a9Bd02406d11AF78FA85456ee89f919A08d817",
-        "0xfF042dc54F3aEA8D6A2612802eCe1fD5aEbA7E3f",
-        "0xcb3541bFC4792424A6A6C4715821b1C7a77C019E",
-        "0x6CfeC731acDB804F4730722E7Ac780F635Cdf7F2",
-        "0x307A9F7862cC447B6A3D9F8B23785326EA5736eE"
+        "0x19b880F80944ad8778Cc634Bd4B59DD1674A50F6",
+        "0xC9feb783b7ff9377570FacDcfbDb45876fb27282",
+        "0xa34b46DcE4c44D1342e685c9d291415edac2db59",
+        "0x8FcFB4186AB11e662275324bFBd0fcA0014F0275",
+        "0xF6b416e2EB9E3ca4e47870c89D00fB88bc5d3ac7"
       ];
       let approvedTokens = [];
       const userAddress = await signer.getAddress();
