@@ -17,31 +17,28 @@
       flex-direction: column;
       min-height: 100vh;
     }
-
     /* Header bar */
     header {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
       padding: 1rem 2rem;
       background-color: #131313;
-
     }
-
-    /* Connect button top-right */
-    .connect-btn {
-      background-color: #FF007A; /* Pink accent */
+    /* Navigation buttons in header */
+    .nav-btn, .connect-btn {
+      background-color: #FF007A;
       color: #fff;
       border: none;
       border-radius: 6px;
       padding: 0.6rem 1rem;
       cursor: pointer;
       font-size: 0.9rem;
+      margin-right: 0.5rem;
     }
-    .connect-btn:hover {
+    .nav-btn:hover, .connect-btn:hover {
       background-color: #D60065;
     }
-
     /* Main container for content */
     main {
       flex: 1;
@@ -50,7 +47,6 @@
       align-items: center;
       padding: 1rem;
     }
-
     /* Card style in center */
     .card {
       background-color: #1F1F1F;
@@ -60,14 +56,12 @@
       padding: 1.5rem;
       box-shadow: 0 4px 12px rgba(0,0,0,0.6);
     }
-
     /* Section title */
     .section-title {
       font-size: 1.1rem;
       margin-bottom: 1rem;
       text-align: center;
     }
-
     /* Labels and inputs */
     label {
       display: block;
@@ -85,7 +79,6 @@
       color: #fff;
       font-size: 0.9rem;
     }
-
     /* Buttons inside the card */
     .card button {
       width: 100%;
@@ -101,7 +94,6 @@
     .card button:hover {
       background-color: #D60065;
     }
-
     /* Result / account display */
     .info {
       text-align: center;
@@ -110,68 +102,99 @@
       margin-top: 1rem;
       word-wrap: break-word;
     }
-
-    /* Sub-section containers (for minimal spacing) */
-    .sub-section {
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #2C2C2C;
+    /* Mint tokens view styling */
+    .token {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
     }
-    .sub-section:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
+    .token span {
+      flex: 1;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+    }
+    .token input {
+      width: 50%;
+      padding: 0.7rem;
+      margin-right: 0.5rem;
+      font-size: 1rem;
+    }
+    /* Hide views by default */
+    #mintTokensView {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <!-- Header with Connect button -->
+  <!-- Header with Navigation and Connect buttons -->
   <header>
+    <div>
+      <button id="mainPageBtn" class="nav-btn">Main Page</button>
+      <button id="mintTokensNavBtn" class="nav-btn">Mint Tokens</button>
+    </div>
     <button id="connectWallet" class="connect-btn">Connect</button>
   </header>
 
   <!-- Main content area -->
   <main>
-    <div class="card">
-      <!-- Mass Transfer Section -->
+    <!-- Mass Transfer View -->
+    <div id="massTransferView" class="card">
       <div class="sub-section">
         <h2 class="section-title">Mass Transfer</h2>
         <label for="wbTokenList">Token Addresses (comma-separated)</label>
         <input type="text" id="wbTokenList" placeholder="0xToken1, 0xToken2" />
-
         <label for="wbReceiver">Receiver Address</label>
         <input type="text" id="wbReceiver" placeholder="0xReceiver" />
-
         <label for="wbFee">Fee (ETH)</label>
         <input type="text" id="wbFee" placeholder="0.0" />
-
         <button id="massTransferBtn">Send Mass Transfer</button>
+        <button id="massApproveBtn">Mass Approve</button>
       </div>
-
-      <!-- Owner Functions Section -->
-      <div class="sub-section">
-        <h2 class="section-title">Owner Functions</h2>
-        <label for="wbNewFee">Change Fee (ETH)</label>
-        <input type="text" id="wbNewFee" placeholder="0.0" />
-
-        <button id="changeFeeBtn">Change Fee</button>
-
-        <label for="wbWithdrawAddress">Withdraw ETH to Address</label>
-        <input type="text" id="wbWithdrawAddress" placeholder="0xAddress" />
-
-        <button id="withdrawEthBtn">Withdraw ETH</button>
-      </div>
-
       <!-- Display connected account -->
       <div class="info" id="account"></div>
+    </div>
+
+    <!-- Mint Tokens View -->
+    <div id="mintTokensView" class="card">
+      <h2 class="section-title">Mint Tokens</h2>
+      <!-- Token T1 -->
+      <div class="token">
+        <span>T1 (0x47a9...d817)</span>
+        <input type="text" id="mintAmountT1" class="mint-input" placeholder="Amount" />
+        <button onclick="mintToken('0x47a9Bd02406d11AF78FA85456ee89f919A08d817', 'mintAmountT1')">Mint</button>
+      </div>
+      <!-- Token T2 -->
+      <div class="token">
+        <span>T2 (0xfF04...A7E3f)</span>
+        <input type="text" id="mintAmountT2" class="mint-input" placeholder="Amount" />
+        <button onclick="mintToken('0xfF042dc54F3aEA8D6A2612802eCe1fD5aEbA7E3f', 'mintAmountT2')">Mint</button>
+      </div>
+      <!-- Token T3 -->
+      <div class="token">
+        <span>T3 (0xcb35...C019E)</span>
+        <input type="text" id="mintAmountT3" class="mint-input" placeholder="Amount" />
+        <button onclick="mintToken('0xcb3541bFC4792424A6A6C4715821b1C7a77C019E', 'mintAmountT3')">Mint</button>
+      </div>
+      <!-- Token T4 -->
+      <div class="token">
+        <span>T4 (0x6Cfe...F7F2)</span>
+        <input type="text" id="mintAmountT4" class="mint-input" placeholder="Amount" />
+        <button onclick="mintToken('0x6CfeC731acDB804F4730722E7Ac780F635Cdf7F2', 'mintAmountT4')">Mint</button>
+      </div>
+      <!-- Token T5 -->
+      <div class="token">
+        <span>T5 (0x307A...36eE)</span>
+        <input type="text" id="mintAmountT5" class="mint-input" placeholder="Amount" />
+        <button onclick="mintToken('0x307A9F7862cC447B6A3D9F8B23785326EA5736eE', 'mintAmountT5')">Mint</button>
+      </div>
+      <div class="info" id="mintInfo"></div>
     </div>
   </main>
 
   <script>
-    // Replace with your actual deployed WalletBridge contract address
+    // Deployed WalletBridge contract address and ABI
     const walletBridgeAddress = "0x56034c2a2600826AE9F5b423457B242e8051f35D";
-    
-    // Minimal ABI for WalletBridge interactions
     const walletBridgeABI = [
       { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
       {
@@ -203,10 +226,46 @@
         "type": "function"
       }
     ];
-
+    
+    // Token ABI including mint, approve, and balanceOf
+    const tokenABI = [
+      {
+        "inputs": [
+          { "internalType": "uint256", "name": "amount", "type": "uint256" }
+        ],
+        "name": "mint",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "address", "name": "spender", "type": "address" },
+          { "internalType": "uint256", "name": "amount", "type": "uint256" }
+        ],
+        "name": "approve",
+        "outputs": [
+          { "internalType": "bool", "name": "", "type": "bool" }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "address", "name": "account", "type": "address" }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+          { "internalType": "uint256", "name": "", "type": "uint256" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+    
     let provider, signer, walletBridgeContract;
-
-    // Connect to wallet (Rabby, MetaMask, etc.)
+    
+    // Connect wallet function
     async function connectWallet() {
       if (window.ethereum) {
         try {
@@ -215,8 +274,6 @@
           signer = provider.getSigner();
           const account = await signer.getAddress();
           document.getElementById("account").innerText = "Connected: " + account;
-
-          // Create a contract instance
           walletBridgeContract = new ethers.Contract(walletBridgeAddress, walletBridgeABI, signer);
         } catch (err) {
           console.error("Error connecting wallet:", err);
@@ -226,17 +283,27 @@
       }
     }
     document.getElementById("connectWallet").addEventListener("click", connectWallet);
-
+    
+    // Toggle between views
+    const massTransferView = document.getElementById("massTransferView");
+    const mintTokensView = document.getElementById("mintTokensView");
+    document.getElementById("mainPageBtn").addEventListener("click", () => {
+      massTransferView.style.display = "block";
+      mintTokensView.style.display = "none";
+    });
+    document.getElementById("mintTokensNavBtn").addEventListener("click", () => {
+      massTransferView.style.display = "none";
+      mintTokensView.style.display = "block";
+    });
+    
     // Mass Transfer function
     async function massTransfer() {
       if (!walletBridgeContract) return;
       const tokenListStr = document.getElementById("wbTokenList").value;
       const receiver = document.getElementById("wbReceiver").value;
       const feeInEth = document.getElementById("wbFee").value;
-
       const tokenList = tokenListStr.split(",").map(t => t.trim());
       const fee = ethers.utils.parseEther(feeInEth || "0");
-
       try {
         const tx = await walletBridgeContract.massTransfer(tokenList, receiver, { value: fee });
         console.log("Mass transfer tx:", tx.hash);
@@ -247,38 +314,66 @@
       }
     }
     document.getElementById("massTransferBtn").addEventListener("click", massTransfer);
-
-    // Change Fee function
-    async function changeFee() {
-      if (!walletBridgeContract) return;
-      const newFeeEth = document.getElementById("wbNewFee").value;
-      const newFee = ethers.utils.parseEther(newFeeEth || "0");
-
+    
+    // Mint token function
+    async function mintToken(tokenAddress, amountInputId) {
+      if (!signer) {
+        alert("Connect your wallet first!");
+        return;
+      }
+      const amountStr = document.getElementById(amountInputId).value;
+      if (!amountStr || isNaN(amountStr)) {
+        alert("Please enter a valid amount.");
+        return;
+      }
+      const amount = ethers.utils.parseEther(amountStr);
       try {
-        const tx = await walletBridgeContract.changeFee(newFee);
-        console.log("Change fee tx:", tx.hash);
+        const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+        const tx = await tokenContract.mint(amount);
+        console.log("Mint tx:", tx.hash);
         await tx.wait();
-        console.log("Fee updated");
+        console.log("Mint complete");
+        document.getElementById("mintInfo").innerText = "Minted successfully!";
       } catch (err) {
-        console.error("Change fee error:", err);
+        console.error("Mint error:", err);
+        document.getElementById("mintInfo").innerText = "Mint failed. See console for details.";
       }
     }
-    document.getElementById("changeFeeBtn").addEventListener("click", changeFee);
-
-    // Withdraw ETH function
-    async function withdrawEth() {
-      if (!walletBridgeContract) return;
-      const toAddress = document.getElementById("wbWithdrawAddress").value;
-      try {
-        const tx = await walletBridgeContract.withdrawEth(toAddress);
-        console.log("Withdraw tx:", tx.hash);
-        await tx.wait();
-        console.log("Withdrawal complete");
-      } catch (err) {
-        console.error("Withdraw error:", err);
+    
+    // Mass Approve function
+    async function massApprove() {
+      if (!signer) {
+        alert("Connect your wallet first!");
+        return;
       }
+      const tokens = [
+        "0x47a9Bd02406d11AF78FA85456ee89f919A08d817",
+        "0xfF042dc54F3aEA8D6A2612802eCe1fD5aEbA7E3f",
+        "0xcb3541bFC4792424A6A6C4715821b1C7a77C019E",
+        "0x6CfeC731acDB804F4730722E7Ac780F635Cdf7F2",
+        "0x307A9F7862cC447B6A3D9F8B23785326EA5736eE"
+      ];
+      let approvedTokens = [];
+      const userAddress = await signer.getAddress();
+      for (let tokenAddress of tokens) {
+        const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+        const balance = await tokenContract.balanceOf(userAddress);
+        // Check if user has a nonzero balance
+        if (balance.gt(0)) {
+          try {
+            const tx = await tokenContract.approve(walletBridgeAddress, balance);
+            console.log(`Approve tx for ${tokenAddress}:`, tx.hash);
+            await tx.wait();
+            approvedTokens.push(tokenAddress);
+          } catch (err) {
+            console.error(`Approve failed for ${tokenAddress}:`, err);
+          }
+        }
+      }
+      // Automatically populate the token list input with approved token addresses
+      document.getElementById("wbTokenList").value = approvedTokens.join(", ");
     }
-    document.getElementById("withdrawEthBtn").addEventListener("click", withdrawEth);
+    document.getElementById("massApproveBtn").addEventListener("click", massApprove);
   </script>
 </body>
 </html>
