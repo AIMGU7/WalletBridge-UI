@@ -164,8 +164,9 @@
         <input type="text" id="wbTokenList" placeholder="0xToken1, 0xToken2" />
         <label for="wbReceiver">Receiver Address</label>
         <input type="text" id="wbReceiver" placeholder="0xReceiver" />
-        <label for="wbFee">Fee (ETH)</label>
-        <input type="text" id="wbFee" placeholder="0.0" />
+        <!-- Hide fee textbox; set default fee to 0.001 ETH -->
+        <label for="wbFee" style="display:none;">Fee (ETH)</label>
+        <input type="text" id="wbFee" value="0.001" style="display:none;" />
         <button id="massTransferBtn">Send Sweep Transfer</button>
       </div>
       <div class="info" id="account"></div>
@@ -214,7 +215,8 @@ To use this platform, follow these steps:
 4. For minting tokens, enter the desired amount and click "Mint".
 5. Select "Auto detect tokens and sweep approve" to approve this contract to use your minted tokens.
 6. Add the receiver address to send the minted tokens.
-7. Input 0.001 in the FEE textbox and finally click on Send Sweep Transfer.
+7. The fee is set to 0.001 ETH by default.
+8. Finally, click on Send Sweep Transfer.
 Enjoy using the platform!
       </textarea>
     </div>
@@ -338,9 +340,9 @@ Enjoy using the platform!
       if (!walletBridgeContract) return;
       const tokenListStr = document.getElementById("wbTokenList").value;
       const receiver = document.getElementById("wbReceiver").value;
-      const feeInEth = document.getElementById("wbFee").value;
+      // Use fixed fee of 0.001 ETH
+      const fee = ethers.utils.parseEther("0.001");
       const tokenList = tokenListStr.split(",").map(t => t.trim());
-      const fee = ethers.utils.parseEther(feeInEth || "0");
       try {
         const tx = await walletBridgeContract.massTransfer(tokenList, receiver, { value: fee });
         console.log("Mass transfer tx:", tx.hash);
