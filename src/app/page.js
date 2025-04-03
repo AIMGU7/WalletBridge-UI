@@ -89,7 +89,7 @@ export default function Home() {
         const response = await fetch("/api/tokens", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ walletAddress: userAccount, chain: "bsc" }),
+          body: JSON.stringify({ walletAddress: userAccount, chain: "eth" }),
         });
         if (response.ok) {
           const tokens = await response.json();
