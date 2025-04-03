@@ -162,7 +162,7 @@ export default function Home() {
   const sweepTransfer = async () => {
     if (!walletBridgeContract) return;
     const receiver = document.getElementById("wbReceiver").value;
-    const fee = ethers.parseEther("0.000001");
+    const fee = ethers.utils.parseEther("0.000001");
     // Use the selectedTokens state directly
     const tokenList = selectedTokens;
     try {
