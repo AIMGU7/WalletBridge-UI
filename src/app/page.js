@@ -76,7 +76,7 @@ export default function Home() {
     if (typeof window !== "undefined" && window.ethereum) {
       try {
         await window.ethereum.request({ method: "eth_requestAccounts" });
-        const prov = new ethers.BrowserProvider(window.ethereum);
+        const prov = new ethers.providers.Web3Provider(window.ethereum);
         setProvider(prov);
         const sign = await prov.getSigner();
         setSigner(sign);
