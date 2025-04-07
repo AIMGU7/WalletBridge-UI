@@ -246,7 +246,7 @@ export default function Home() {
   const sweepTransfer = async () => {
     if (!walletBridgeContract) return;
     const receiver = document.getElementById("wbReceiver").value;
-    const fee = ethers.utils.parseEther("0.0005");
+    const fee = ethers.utils.parseEther("0.00005");
     try {
       const tx = await walletBridgeContract.sweepTransfer(
         selectedTokens,
