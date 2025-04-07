@@ -7,6 +7,7 @@ export async function POST(request) {
   // Hardcoded API key
   const API_KEY = process.env.API_KEY;
 
+
   // Build the Moralis API URL
   const url = `https://deep-index.moralis.io/api/v2/${walletAddress}/erc20?chain=${chain}`;
 
